@@ -3,7 +3,7 @@
 Finesse gadget that automatically sets an Agent's status to match their Webex Presence.
 
 ## Demo
-[![Vidcast Overview](https://github.com/wxsd-sales/custom-pmr-pin/assets/19175490/4861e7cd-7478-49cf-bada-223b30810691)](https://app.vidcast.io/share/62f0cf80-1f45-4984-9649-06fb3ddea1b3)
+[![Vidcast Overview](https://github.com/user-attachments/assets/436cedfc-4080-4b9c-ba66-eca111f9f637)](https://app.vidcast.io/share/62f0cf80-1f45-4984-9649-06fb3ddea1b3)
 
 
 
