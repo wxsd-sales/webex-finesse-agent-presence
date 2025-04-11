@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+    <ModulePrefs title="Webex Presence Connector"
+        description="Webex Presence Connector"
+        thumbnail="http://localhost:8080/">
+
+        <Require feature="settitle" />
+        <Require feature="dynamic-height" />
+        <Require feature="pubsub-2" />
+        <Require feature="setprefs" />
+    </ModulePrefs>
+    <UserPref name="scheme" display_name="scheme" default_value=""/>
+    <UserPref name="host" display_name="host" default_value=""/>
+    <UserPref name="hostPort" display_name="hostPort" default_value=""/>
+    <Content type="html">
+        <![CDATA[
+            <!DOCTYPE html>
+            <!-- Styling -->
+            <!-- <link rel="stylesheet" href="WebexPresenceConnector.css" type="text/css" /> -->
+            
+            <!-- jQuery -->
+            <script type="text/javascript" 
+                src="__UP_scheme__://__UP_host__:__UP_hostPort__/desktop/assets/js/jquery.min.js">
+            </script>
+           
+            <!-- Finesse Library -->
+            <script type="text/javascript" 
+                src="__UP_scheme__://__UP_host__:__UP_hostPort__/desktop/assets/js/finesse.min.js">
+            </script>
+
+            <!-- Socket.io -->
+            <!-- <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>-->
+
+            <!-- Webex SDK -->
+            <!-- <script crossorigin src="https://unpkg.com/webex@3.7.0/umd/webex.min.js"></script>-->
+
+            <body class="claro">
+                <div id="embeddedPresenceGadget">
+                </div>
+            </body>
+
+            <script type="text/javascript">
+                HOSTNAME = "https://tahanson.eu.ngrok.io";
+                console.log("presence-gadget-logger: loading css");
+                let cssLink = document.createElement('link');
+                cssLink.rel = "stylesheet";
+                cssLink.type = "text/css";
+                cssLink.href = HOSTNAME+"/WebexPresenceConnector.css";
+                document.head.append(cssLink);
+                console.log("presence-gadget-logger: appended css");
+                console.log("presence-gadget-logger: loading script");
+                let script = document.createElement('script');
+                script.src = HOSTNAME+"/WebexPresenceConnector.js";
+                script.onload = function(){
+                    console.log("presence-gadget-logger: loaded WebexPresenceConnector.js");
+                    console.log("presence-gadget-logger: gadgets.HubSettings:", gadgets.HubSettings);
+                    let initFlag = false;
+                    gadgets.HubSettings.onConnect = function () {
+                        if(!initFlag){
+                            initFlag = true;
+                            console.log("presence-gadget-logger: initializing WebexPresenceConnector in onConnect");
+                            finesse.modules.WebexPresenceConnector.init();
+                        }
+                    };
+                    setTimeout(function(){
+                        if(!initFlag){
+                            initFlag = true;
+                            console.log("presence-gadget-logger: setTimeout triggered, initializing WebexPresenceConnector");
+                            finesse.modules.WebexPresenceConnector.init();
+                        }
+                    },5000);
+                }
+                document.body.append(script);
+            </script>
+        ]]>
+    </Content>
+</Module>

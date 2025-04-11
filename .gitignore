@@ -1,0 +1,8 @@
+*.env
+.DS_STORE
+node_modules/
+old/
+notes
+package-lock.json
+agent-presence.code-workspace
+test.html
