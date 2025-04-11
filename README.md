@@ -1,88 +1,77 @@
-# Contact Center Meeting Transfer Widget
+# Webex Finesse Agent Presence Sync Gadget
 
-Hosts a widget which will function inside of Contact Center Agent Desktop that allows a Webex CC agent to transfer an inbound or outbound call into a Webex Meeting.
+Finesse gadget that automatically sets an Agent's status to match their Webex Presence.
 
 ## Demo
-<!--[![Vidcast Overview](https://github.com/wxsd-sales/custom-pmr-pin/assets/19175490/4861e7cd-7478-49cf-bada-223b30810691)](https://app.vidcast.io/share/3f264756-563a-4294-82f7-193643932fb3)-->
+[![Vidcast Overview](https://github.com/wxsd-sales/custom-pmr-pin/assets/19175490/4861e7cd-7478-49cf-bada-223b30810691)](https://app.vidcast.io/share/62f0cf80-1f45-4984-9649-06fb3ddea1b3)
 
 
-## Developer Documentation
-
-**https://developer.webex-cx.com/documentation/guides/desktop**  
-**https://developer.webex.com/docs/api/v1/call-controls**
 
 ## Getting Started
 
 - Clone this repository:
-- ```git clone https://github.com/wxsd-sales/cc-meeting-transfer-widget.git```
+ - ```git clone https://github.com/wxsd-sales/webex-finesse-agent-presence.git```
 
-The widget can be hosted locally for testing on the same machine as the agent desktop.  However, you will want to deploy this to a webserver with an SSL certificate when going live.
+You will probably want to deploy this to a webserver when going live.
 
-To understand how to interact with our Desktop Layout, please watch the video and supplemental detailed documentation @ **[Desktop Layout - Administration Guide](https://www.cisco.com/c/en/us/td/docs/voice_ip_comm/cust_contact/contact_center/webexcc/SetupandAdministrationGuide_2/b_mp-release-2/b_cc-release-2_chapter_011.html#topic_8230815F4023699032326F948C3F1495)**
+- [Create a Webex Bot Token](https://developer.webex.com/docs/bots)
+- Developed with node v21.5
+
 
 ## Installation
 
-### 1. Setting up the Webex Integration
-
-* a. [Create a new Webex Oauth "Integration"](https://developer.webex.com/my-apps/new)
-  * i. The creator/owner of the integration does not matter, but must have a Webex account.
-  * ii. You can give it any name ("Contact Center Meeting Transfer Widget") and any 512x512 icon - the Agents signing into it will only ever see the name and icon the first time signing in.
-* b. The redirect URI of the integration must be ```YOURSERVERURL/auth```, examples:
-  * i. ```http://localhost:5000/auth```
-  * ii. ```https://your.server.com/auth```
-* c. Whatever your server address, you will need this again in the next steps (just the base url, NOT including "/auth").
-* d. The Scopes selected must be:
-  * ```spark:calls_read```
-  * ```spark:calls_write```
-  * ```spark:people_read```
-  * ```spark:xsi```
-* e. Save the client_id, and client_secret for the next step
-
-### 2. Setting up the .env file
+### 1. Setting up the .env file
 - a. Inside this project's root folder, rename the file ```.env.example``` to ```.env```
 - b. In a text editor, open the ```.env```
 - c. Choose a ```PORT``` or use ```PORT=5000``` if you are not sure what to use.
-- d. Paste the client_id and client_secret values from step 1 to the right of the ```=``` for the corresponding ```CLIENT_ID=``` and ```CLIENT_SECRET=``` variables.
-- e. Paste your base url for your server between the double quotes of ```HOST_URI=""```.  If referring to examples from step 1, then either:
-  - i. ```HOST_URI="http://localhost:5000"```
-  - ii. ```HOST_URI="https://your.server.com"```
+- d. Paste the Webex Bot Token you created from the *Getting Started* section.
+- e. To run this application in Gadget mode (recommended), you can **stop here and proceed to step 2**.
+- e. This application can be run completely on the server side without a gadget, with some caveats:
+  - A ```FINESSE_ADMIN_TOKEN``` and ```FINESSE_SUPERVISOR_TOKEN``` are required in the .env.
+    - These are both Basic Auth tokens (username:password + encoding)
+  - ```GADGET_MODE``` would need to be set to false
+  - When running outside of gadget mode, an agent's status would only be READY and "Supervisor Initiated" NOT_READY. This is because a Supervisor cannot set an Agent to a specific NOT_READY status.
+  
 
-### 3.a. Running the widget webserver as a container (Docker) (recommended)
+### 2.a. Running the widget webserver as a container (Docker) (recommended)
 
-- If you prefer to run this through ```npm```, skip this step and proceed to 3.b.
+- If you prefer to run this through ```npm```, skip this step and proceed to 2.b.
 - Otherwise, run the following commands from the terminal inside your project's root directory:
-- `docker build -t cc-meeting-transfer-widget .`
-- `docker run -p 5000:5000 -i -t cc-meeting-transfer-widget`
+- `docker build -t agent-presence .`
+- `docker run -p 5000:5000 -i -t agent-presence`
   - replace `5000` in both places with the ```PORT``` used in your `.env` file.  
 
-### 3.b. Running the widget webserver (npm)
-_Node.js version >= 14.5 must be installed on the system in order to run this through npm._
+### 2.b. Running the widget webserver (npm)
+_Node.js version 21.5 was used to develop this application._
 
-- It is recommended that you run this as a container (step 3.a.).
+- It is recommended that you run this as a container (step 2.a.).
 - If you do not wish to run the webserver as a container (Docker), proceed with this step:
 - Inside this project on your terminal type: `npm install`
-- Then inside this project on your terminal type: `npm run build`
-- Then inside this project on your terminal type: `npm run dev`
+- Then inside this project on your terminal type: `npm start`
 - This should run the app on your ```PORT``` (from .env file)
 
 
-### 4. Wire Up the Widget to the Layout:
+### 3. Wire Up the Gadget to the Agent Layout (Only is using the recommended Gadget Mode, GADGET_MODE=true):
 
-- You must replace the url on line 108 of the **_callControlWidget.json_** file with your correct server endpoint. For examples:
-  - "script": "http://localhost:5000/build/bundle.js",
-  - "script": "https://your.webserver.com/build/bundle.js",
-- This should be based on the ```HOST_URI``` in your .env file + ```/build/bundle.js```.
-  
-- Upload the **_callControlWidget.json_** file onto your Administration Portal **[WebexCC Portal - US](https://portal.wxcc-us1.cisco.com/portal/home.html#)**
-  - _link above is referencing the US portal link please change if you are in different geo (us1, eu1, eu2, anz1)_
-  - Note that Layouts are configured per Agent Team.
-- Log in to your agent and select the right Team to view the new layout.
+- You must replace the HOSTNAME on line 43 of the **public/WebexPresenceConnector_1.xml** file with your correct server endpoint. For example:
+  - HOSTNAME="https://your.webserver.com"
+
+- Login to Unified Contact Center Enterprise Management and create Reason Labels with the following names:
+  - Webex DND
+  - Webex Meeting
+  - Webex Call
+  - Webex Unavailable
+- Login to your Cisco Finesse Administration Portal and edit the Desktop Layout. You will likely do this through the Team Resources tab and not the Desktop Layout tab.
+  - Edit the Agent's Home view, by adding a gadget that looks like this example:
+  - ```<gadget id="embeddedPresence">https://your.webserver.com/WebexPresenceConnector_1.xml</gadget>```
+- Log in to your agent desktop to view the new layout.
 
 **Additional Improvements:**
 
-- You can modify the widget as required.
-- To create a new compiled JS file, using `npm run build` which will create the new compiled JS under `build/bundle.js`.
-- You may rename this file, host it on your server of choice, and use this as the widget `src` parameter in the layout.
+- You can modify the gadget as required.
+- Finesse server caches all gadget XML and JS files, so changes made to your web server may not reflect in Finesse without a restart.
+- To avoid this constraint, this project loads our JS dynamically and you should make all changes to the WebexPresenceConnector.js file going forward.
+- Aside from the HOSTNAME, you should not need to make any changes to the WebexPresenceConnector_1.xml file. If you do, you will need to restart Finesse Server.
 
 ## License
 
@@ -96,4 +85,4 @@ Everything included is for demo and Proof of Concept purposes only. Use of the s
  
 ## Support
 
-Please contact the Webex SD team at [wxsd@external.cisco.com](mailto:wxsd@external.cisco.com?subject=CCMeetingTransferWidget) for questions. Or for Cisco internal, reach out to us on Webex App via our bot globalexpert@webex.bot & choose "Engagement Type: API/SDK Proof of Concept Integration Development". 
+Please contact the Webex SD team at [wxsd@external.cisco.com](mailto:wxsd@external.cisco.com?subject=WebexFinesseAgentPresenceGadget) for questions. Or for Cisco internal, reach out to us on Webex App via our bot globalexpert@webex.bot & choose "Engagement Type: API/SDK Proof of Concept Integration Development". 
